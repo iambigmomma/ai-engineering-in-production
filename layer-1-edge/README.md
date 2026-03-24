@@ -4,11 +4,11 @@
 
 ## Background & Inspiration
 
-This lab is inspired by Richard's [tunnels-for-ai-inference](https://github.com/rxsalad/tunnels-for-ai-inference), which demonstrates how Cloudflare Tunnel can expose Kubernetes-hosted vLLM servers to the internet without opening inbound ports. It's a well-structured PoC that covers the core architecture clearly.
+This lab is inspired by [tunnels-for-ai-inference](https://github.com/rxsalad/tunnels-for-ai-inference), which demonstrates how Cloudflare Tunnel can expose vLLM inference servers to the internet without opening inbound ports.
 
-This lab adapts the same idea so you can run it on **a single GPU server with Docker** — no Kubernetes cluster needed. On top of the basic setup, we'll layer in 6 production hardening practices:
+This lab adapts the same idea so you can run it on **a single GPU server with Docker** — no Kubernetes cluster needed. On top of the basic setup, we layer in 6 production hardening practices:
 
-| Foundation (from Richard's PoC) | What we add in this lab |
+| What we start with | What we add |
 |---|---|
 | vLLM serving Llama 3.1 8B | - |
 | Cloudflare Tunnel (outbound-only) | - |
@@ -19,13 +19,6 @@ This lab adapts the same idea so you can run it on **a single GPU server with Do
 | - | Fix 4: Timeout Tuning |
 | - | Fix 5: 3-Layer Health Checks |
 | - | Fix 6: Observability (Request ID) |
-
-### Environment Comparison
-
-- **Richard's PoC**: Kubernetes cluster, AMD MI325 GPUs (ROCm), persistent tunnel with custom domain
-- **This Lab**: Single GPU server (NVIDIA RTX 6000 Ada), Docker, quick tunnel (no domain needed)
-
-The core concepts are the same. We simplify the deployment so you can focus on the hardening.
 
 ---
 
@@ -97,8 +90,6 @@ INFO:     Uvicorn running on http://0.0.0.0:8000
 
 Press `Ctrl+C` to exit the log stream once you see it.
 
-> **Compare with PoC**: Richard's vllm-server.yaml uses `rocm/vllm` (AMD GPU image) with `--enforce-eager` and `--tensor-parallel-size 1`. We use `vllm/vllm-openai` (NVIDIA image). We skip `--enforce-eager` because CUDA graphs work well on NVIDIA and give better performance.
-
 ### Step 3: Test Local Inference
 
 **What you're doing**: Sending a chat completion request directly to vLLM to confirm it works.
@@ -135,13 +126,11 @@ sudo dpkg -i cloudflared.deb
 cloudflared --version
 ```
 
-> **Compare with PoC**: Richard deploys cloudflared as Kubernetes pods (3 replicas) using `cloudflare/cloudflared:2025.11.1`. We install it directly on the host since we're not using Kubernetes.
-
 ### Step 5: Create a Quick Tunnel
 
 **What you're doing**: Creating a temporary public URL that points to your local vLLM server.
 
-**Why**: Quick tunnels require no Cloudflare account, no domain, no configuration. Perfect for testing. In production you'd use a persistent tunnel with a custom domain (like Richard's `llm.rshue.com`).
+**Why**: Quick tunnels require no Cloudflare account, no domain, no configuration. Perfect for testing. In production you'd use a persistent tunnel with a custom domain.
 
 ```bash
 cloudflared tunnel --url http://localhost:8000
@@ -249,8 +238,6 @@ ingress:
   - service: http_status:404
 EOF
 ```
-
-> **Compare with PoC**: Richard's `tunnel.yaml` does the same thing but as a Kubernetes Deployment with 3 replicas. The tunnel routing (public hostname → private service) is configured in the Cloudflare dashboard instead of a local config file. The concept is identical.
 
 ### Step 11: Run the Persistent Tunnel
 
@@ -833,12 +820,11 @@ curl -i https://<TUNNEL_URL>/health \
 ## What You've Built
 
 ```
-Before (rxsalad PoC):
+Basic setup:
   Internet → Cloudflare → Tunnel → vLLM
-  (open to anyone, no monitoring, default timeouts)
 
-After (this lab):
-  Internet → Auth → Rate Limit → Timeout Tuning → Tunnel → nginx (Request ID + SSE) → vLLM
+After hardening:
+  Internet → Auth → Rate Limit → Tunnel → nginx (Request ID + SSE + Timeout) → vLLM
   (authenticated, rate-limited, observable, streaming, resilient)
 ```
 
@@ -850,7 +836,7 @@ With the edge layer secured, Layer 2 introduces a **Two-Level Proxy Architecture
 
 ## Reference
 
-- [rxsalad/tunnels-for-ai-inference](https://github.com/rxsalad/tunnels-for-ai-inference) — Original PoC
+- [rxsalad/tunnels-for-ai-inference](https://github.com/rxsalad/tunnels-for-ai-inference) — Inspiration for this lab
 - [Cloudflare Tunnel Docs](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/)
 - [vLLM Documentation](https://docs.vllm.ai/)
 - [Cloudflare Access Service Tokens](https://developers.cloudflare.com/cloudflare-one/identity/service-tokens/)
