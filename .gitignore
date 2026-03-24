@@ -1,1 +1,10 @@
 tunnels-for-ai-inference/
+
+# Secrets - never commit these
+*.env
+*-token.env
+*.json
+!package.json
+
+# Downloaded binaries
+*.deb

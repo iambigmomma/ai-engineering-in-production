@@ -1,0 +1,17 @@
+# Cloudflare Tunnel config for Layer 1
+# Copy this to ~/.cloudflared/config.yml and replace the placeholder values.
+
+tunnel: <YOUR_TUNNEL_ID>
+credentials-file: /home/<YOUR_USER>/.cloudflared/<YOUR_TUNNEL_ID>.json
+
+ingress:
+  - hostname: <YOUR_DOMAIN>
+    service: http://localhost:8000
+    originRequest:
+      # Fix 3: SSE streaming support
+      disableChunkedEncoding: false
+      # Fix 4: Timeout tuning for long-context requests
+      connectTimeout: 30s
+      keepAliveTimeout: 120s
+      noTLSVerify: true
+  - service: http_status:404
