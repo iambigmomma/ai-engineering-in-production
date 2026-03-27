@@ -1,6 +1,19 @@
-# Layer 2: Two-Level Proxy Architecture
+# Layer 2: Inference Gateway
 
-> **Goal**: Evolve the single nginx proxy from Layer 1 into a two-level proxy architecture that supports multiple models, request routing, load balancing, and API management.
+> The Maitre d' — decides which kitchen station handles your order
+
+**Goal**: Build an intelligent inference gateway that routes requests to the right model, on the right GPU, at the right cost.
+
+## Scope (v2)
+
+Four routing patterns for production inference:
+
+1. **Edge-to-pod routing** — Cloudflare tunnel → cloudflared → NGINX → vLLM (covered below)
+2. **Model-based routing** — Route by model name/size in request body (covered below)
+3. **Cost-aware routing** — Small requests → small GPUs, complex → large GPUs (planned)
+4. **Disaggregation-aware routing** — Separate prefill and decode phases to different server pools (planned)
+
+---
 
 ## Background
 

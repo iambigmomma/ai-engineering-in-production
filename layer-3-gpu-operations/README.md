@@ -1,6 +1,17 @@
-# Layer 3: GPU Reliability & Failure Management
+# Layer 3: GPU Operations
 
-> **Goal**: Build a system that detects GPU failures, recovers automatically, and keeps serving inference with minimal downtime.
+> When the oven breaks during dinner service — what the textbooks don't cover
+
+**Goal**: Build production GPU operations — health monitoring, automated recovery, and failure management that keeps inference running.
+
+## Scope (v2)
+
+- **GPU health monitoring** beyond HTTP health checks (VRAM usage, inference latency as signal)
+- **OOM recovery** patterns (graceful degradation, automatic model offloading)
+- **NVIDIA / AMD portability** (CUDA vs ROCm, driver lifecycle management) (planned)
+- **Driver and runtime lifecycle** (upgrades without downtime) (planned)
+
+---
 
 ## Background
 

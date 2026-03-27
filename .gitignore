@@ -8,3 +8,6 @@ tunnels-for-ai-inference/
 
 # Downloaded binaries
 *.deb
+
+# Private strategy docs
+ai_production_engineering_bootstrap.md
