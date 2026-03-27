@@ -408,6 +408,20 @@ Layer 3:
   Docker Compose for declarative stack management
 ```
 
+## Moving to Kubernetes
+
+The GPU operations concepts in this lab map directly to Kubernetes:
+
+- **GPU health monitoring** → Use the [NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) which provides `nvidia-smi` metrics as Prometheus endpoints. Combine with [DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter) for detailed GPU telemetry
+- **OOM recovery** → Kubernetes restart policies (`restartPolicy: Always`) replace Docker's `--restart unless-stopped`. Pod disruption budgets ensure minimum availability during restarts
+- **Docker Compose stack** → Becomes Helm charts or Kustomize manifests. The same services (vLLM, nginx, gpu-monitor) become Deployments with proper resource requests
+- **Health check scripts** → Map to liveness probes (process check), readiness probes (API check), and startup probes (inference check) on your vLLM pods
+- **Recovery scripts** → Kubernetes handles container restarts natively. For node-level GPU failures, use [Node Problem Detector](https://github.com/kubernetes/node-problem-detector) with GPU-specific rules
+
+The monitoring and recovery patterns you learned here are the same patterns — Kubernetes just automates the restart/failover parts that you did manually with Docker.
+
+---
+
 ## Next: Layer 4
 
 Layer 4 covers **Multi-Node GPU Communication** — scaling inference across multiple machines with distributed vLLM.

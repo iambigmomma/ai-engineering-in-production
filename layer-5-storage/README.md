@@ -337,6 +337,20 @@ Together, these 5 layers form a production-grade AI inference infrastructure tha
 
 ---
 
+## Moving to Kubernetes
+
+Model storage and loading patterns translate well to Kubernetes:
+
+- **Shared HuggingFace cache** → Use a PersistentVolumeClaim (PVC) with `ReadWriteMany` access mode. All vLLM pods mount the same volume, so models are downloaded once and shared across pods
+- **Pre-download models** → Run a Kubernetes Job or init container that downloads models before the main vLLM container starts. This turns cold starts into warm starts
+- **S3/Spaces remote storage** → Same `aws s3 sync` pattern, but run from an init container. Or use [CSI drivers](https://docs.digitalocean.com/products/kubernetes/how-to/add-volumes/) to mount Spaces directly as a volume
+- **Model registry** → Use DigitalOcean Container Registry (DOCR) or a dedicated model registry. Package model weights as OCI artifacts for versioned, cacheable distribution
+- **Fast loading with safetensors** → Same benefits in Kubernetes. Memory-mapped loading works regardless of orchestration layer
+
+The key Kubernetes advantage for model storage: PVCs persist across pod restarts, so model downloads survive crashes without re-downloading. Combined with node-local caching (via `hostPath` volumes), you get near-instant warm starts even when pods are rescheduled.
+
+---
+
 ## Reference
 
 - [HuggingFace Hub documentation](https://huggingface.co/docs/hub/en/index)

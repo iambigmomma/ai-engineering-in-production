@@ -311,6 +311,20 @@ Layer 5 covers **Model Storage & Loading** — efficient model downloading, cach
 
 ---
 
+## Moving to Kubernetes
+
+Multi-node GPU communication is where Kubernetes becomes especially valuable:
+
+- **Ray cluster** → Use the [KubeRay Operator](https://docs.ray.io/en/latest/cluster/kubernetes.html) to manage Ray clusters as Kubernetes custom resources. Head and worker nodes become pods with GPU resource requests
+- **Tensor parallelism across nodes** → Same vLLM `--tensor-parallel-size` flag, but Ray discovers workers through Kubernetes Service DNS instead of manual IP addresses
+- **NCCL configuration** → Set via environment variables in pod specs. Use `hostNetwork: true` or Kubernetes network policies to ensure GPU-to-GPU communication uses the right network interface
+- **GPU topology** → Kubernetes node labels and affinity rules let you schedule TP workloads on nodes with NVLink, and PP workloads across nodes connected by high-bandwidth networking
+- **Scaling** → Adding GPU nodes to the Kubernetes cluster automatically makes them available to Ray. No manual `ray start --address` needed
+
+For a complete Kubernetes-based multi-node inference deployment, see the [llm-d tutorial](link) which uses DOKS with GPU node pools.
+
+---
+
 ## Reference
 
 - [vLLM distributed inference](https://docs.vllm.ai/en/latest/serving/distributed_serving.html)

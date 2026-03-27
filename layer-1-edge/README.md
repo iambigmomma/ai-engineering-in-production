@@ -834,6 +834,20 @@ With the edge layer secured, Layer 2 introduces a **Two-Level Proxy Architecture
 
 ---
 
+## Moving to Kubernetes
+
+The concepts in this lab apply directly to Kubernetes deployments:
+
+- **Cloudflare Tunnel** → Run `cloudflared` as a Kubernetes Deployment, or use the [Cloudflare Tunnel Operator](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/deploy-tunnels/deployment-guides/kubernetes/) with a Helm chart
+- **nginx reverse proxy** → Use an NGINX Ingress Controller or a standalone nginx Deployment with your config in a ConfigMap
+- **Service Tokens & Rate Limiting** → These are configured in Cloudflare's dashboard, not on your server — they work identically regardless of whether the backend is Docker or Kubernetes
+- **Health checks** → Map directly to Kubernetes liveness and readiness probes on your vLLM pods
+- **vLLM container** → Becomes a Deployment with GPU resource requests (`nvidia.com/gpu: 1`)
+
+The key insight: everything you configured here (nginx config, cloudflared tunnel, Cloudflare Access policies) stays the same. Kubernetes only changes how you deploy and manage the containers, not what they do.
+
+---
+
 ## Reference
 
 - [rxsalad/tunnels-for-ai-inference](https://github.com/rxsalad/tunnels-for-ai-inference) — Inspiration for this lab
