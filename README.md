@@ -1,148 +1,148 @@
 # The AI Inference Kitchen
-## 從米其林餐廳學 AI Production Engineering
+## Learn AI Production Engineering from a Michelin Restaurant
 
 ---
 
-## 核心類比
+## Core Analogy
 
-**你在經營一家米其林餐廳。**
+**You're running a Michelin-starred restaurant.**
 
-每天有成千上萬的客人想來用餐。他們期待：完美的餐點、快速的上菜、24/7 不打烊。
+Thousands of guests want to dine every day. They expect: perfect dishes, fast service, and 24/7 availability.
 
-| 餐廳 | AI Inference |
-|-----|-------------|
-| 客人 | Request |
-| 餐點 | Response |
-| 主廚 | vLLM |
-| 爐灶/烤箱 | GPU |
-| 週六晚上 | Traffic spike |
-| VIP 客人 | Priority request |
-| 菜單 | Model |
-| 食譜 | Model weights |
-
----
-
-## The Story: 從私廚到米其林
-
-### Chapter 0: 在家辦私廚（PoC）
-
-你是一個超棒的廚師。朋友來家裡吃飯，都說你做的菜比餐廳還好吃。
-
-「你應該開一家餐廳！」
-
-**這就是 PoC 階段**：你有一個很厲害的模型（主廚），在本地跑得很好（家裡的廚房）。但是，**在家做菜**和**開餐廳**是完全不同的事。
-
-開餐廳需要五件事：
-
-1. 一道安全的大門
-2. 一位聰明的領班
-3. 一套設備維運制度
-4. 多廚房協作能力
-5. 一個管理良好的倉庫
-
-這就是我們的五層架構。
+| Restaurant | AI Inference |
+|-----------|-------------|
+| Guest | Request |
+| Dish | Response |
+| Head Chef | vLLM |
+| Stove / Oven | GPU |
+| Saturday night | Traffic spike |
+| VIP guest | Priority request |
+| Menu | Model |
+| Recipe | Model weights |
 
 ---
 
-### Chapter 1: 餐廳入口（[Layer 1: Zero-Trust Edge](layer-1-edge/)）
+## The Story: From Home Cooking to Michelin Star
 
-**故事**：你的餐廳太火爆了。每天有人排隊到街尾。
+### Chapter 0: Home Kitchen (PoC)
 
-| 問題 | 解決方案 | 技術對應 |
-|-----|---------|---------|
-| 不想讓所有人知道地址 | 私人車道 | **Cloudflare Tunnel** |
-| 確認客人身份 | 訂位確認碼 | **Service Auth Token** |
-| 控制入場人數 | 每時段限制 | **Rate Limiting** |
-| 防止暴民衝入 | 保全團隊 | **DDoS Protection** |
-| 一道一道上菜 | 上菜節奏 | **Streaming (SSE)** |
+You're an amazing cook. Every friend who eats at your place says your food is better than any restaurant.
 
-**Tutorial**：「開餐廳第一課：誰能進來？」
+"You should open a restaurant!"
 
----
+**This is the PoC stage**: you have a great model (head chef) that runs well locally (your home kitchen). But **cooking at home** and **running a restaurant** are completely different things.
 
-### Chapter 2: 領班出場（[Layer 2: Inference Gateway](layer-2-inference-gateway/)）
+Running a restaurant requires five things:
 
-**故事**：客人進門了，但你現在有三個廚房 — 快炒區、主菜區、甜點區。誰來決定每張單送去哪裡？
+1. A secure front door
+2. A smart maitre d'
+3. An equipment maintenance system
+4. Multi-kitchen coordination
+5. A well-managed warehouse
 
-這就是**領班（Maitre d'）**的工作。他站在入口，看著點單，做四個決策：
-
-| 決策 | 領班怎麼做 | 技術對應 |
-|-----|-----------|---------|
-| 客人從哪裡進來的？ | 確認是從正門進來、經過保全檢查的 | **Edge-to-pod routing** |
-| 這張單該去哪個廚房？ | 看點的是什麼菜，送去對應廚房 | **Model-based routing** |
-| 簡單的菜不要浪費大廚 | 炒飯送快炒區，牛排送主菜區 | **Cost-aware routing** |
-| 備料和烹飪可以分開 | 備料間先切好，再送去對應爐台 | **Disaggregation-aware routing** |
-
-**Tutorial**：「開餐廳第二課：每張單送去哪個廚房？」
+This is our five-layer architecture.
 
 ---
 
-### Chapter 3: 設備維運（[Layer 3: GPU Operations](layer-3-gpu-operations/)）
+### Chapter 1: The Restaurant Entrance ([Layer 1: Zero-Trust Edge](layer-1-edge/))
 
-**故事**：週六晚上，餐廳爆滿。突然，主力烤箱壞了。
+**Story**: Your restaurant is wildly popular. People queue down the street every day.
 
-這不是「會不會壞」的問題，是「壞了怎麼辦」的問題。
+| Problem | Solution | Technical Mapping |
+|---------|----------|-------------------|
+| Don't want everyone to know the address | Private driveway | **Cloudflare Tunnel** |
+| Verify guest identity | Reservation confirmation code | **Service Auth Token** |
+| Control admission rate | Per-timeslot limits | **Rate Limiting** |
+| Prevent mob rushes | Security team | **DDoS Protection** |
+| Serve course by course | Pacing the service | **Streaming (SSE)** |
 
-| 策略 | 說明 | 技術對應 |
-|-----|------|---------|
-| 設備健檢 | 每小時巡檢溫度、瓦斯壓力，不等到壞了才發現 | **GPU health monitoring** |
-| 備用烤箱 | 壞了馬上切換，客人甚至不會發現 | **OOM recovery** |
-| 簡化菜單 | 暫停複雜料理，保住基本出餐 | **Graceful degradation** |
-| 換品牌的爐子 | 德國爐換成義大利爐，火候要重新調 | **NVIDIA / AMD portability** |
-| 升級設備不停業 | 凌晨換新爐，早上照常開門 | **Driver lifecycle management** |
-
-**Tutorial**：「開餐廳第三課：爐子壞了怎麼辦？」
+**Tutorial**: "Restaurant Lesson 1: Who gets in?"
 
 ---
 
-### Chapter 4: 多廚房協作（[Layer 4: Multi-Node GPU Communication](layer-4-multi-node/)）
+### Chapter 2: The Maitre d' ([Layer 2: Inference Gateway](layer-2-inference-gateway/))
 
-**故事**：接了一場 200 人的婚宴。一個廚房做不完，三個廚房要同時出菜。
+**Story**: Guests are in the door, but now you have three kitchens — stir-fry station, main course station, and dessert station. Who decides where each order goes?
 
-| 挑戰 | 解決方案 | 技術對應 |
-|-----|---------|---------|
-| 一道菜分多站同做 | 前菜台、主菜台同時處理同一道菜的不同部分 | **Tensor parallelism** |
-| 流水線出菜 | 第一站做完傳給第二站 | **Pipeline parallelism** |
-| 快速溝通 | 專用對講機頻道，不靠吼的 | **NCCL/RCCL** |
-| 走道動線設計 | 廚房之間的傳菜通道要夠寬 | **Inter-node networking** |
+That's the **Maitre d'**'s job. Standing at the entrance, reading the order ticket, making four decisions:
 
-**Tutorial**：「開餐廳第四課：多個廚房怎麼協作？」
+| Decision | What the Maitre d' Does | Technical Mapping |
+|----------|------------------------|-------------------|
+| Where did the guest come from? | Confirm they entered through the front door and passed security | **Edge-to-pod routing** |
+| Which kitchen gets this order? | Read what was ordered, send to the right kitchen | **Model-based routing** |
+| Don't waste the head chef on simple dishes | Fried rice goes to stir-fry, steak goes to main course | **Cost-aware routing** |
+| Separate prep from cooking | Prep kitchen cuts ingredients first, then sends to the right station | **Disaggregation-aware routing** |
 
----
-
-### Chapter 5: 食材倉儲（[Layer 5: Model Storage](layer-5-storage/)）
-
-**故事**：每天開店前，要從倉庫拿食材、切好備料、熱好爐子。第一位客人能多快吃到菜，取決於你的備料做得多好。
-
-| 工作 | 說明 | 技術對應 |
-|-----|------|---------|
-| 中央倉庫 | 所有分店共用的大冰庫 | **Remote storage (S3/Spaces)** |
-| 店內冰箱 | 今天要用的食材先搬過來 | **Local cache (HF cache)** |
-| 備料台 | 切好、醃好、隨時能下鍋 | **Pre-download + warm start** |
-| 食材標準化 | 所有食材用統一規格包裝，拆開就能用 | **Safetensors format** |
-| 多套菜單備料 | 倉庫裡預存不同菜系的食材 | **Multi-model caching** |
-
-**Tutorial**：「開餐廳第五課：開店前要準備什麼？」
+**Tutorial**: "Restaurant Lesson 2: Which kitchen gets each order?"
 
 ---
 
-## 延伸場景
+### Chapter 3: Equipment Operations ([Layer 3: GPU Operations](layer-3-gpu-operations/))
+
+**Story**: Saturday night, the restaurant is packed. Suddenly, the main oven breaks down.
+
+This isn't a question of "will it break" — it's "what do we do when it breaks."
+
+| Strategy | Description | Technical Mapping |
+|----------|-------------|-------------------|
+| Equipment health checks | Hourly inspections of temperature and gas pressure — don't wait until it breaks | **GPU health monitoring** |
+| Backup oven | Switch immediately — guests won't even notice | **OOM recovery** |
+| Simplified menu | Pause complex dishes, keep basic service running | **Graceful degradation** |
+| Swap oven brands | Switch from German to Italian ovens — heat calibration needs adjustment | **NVIDIA / AMD portability** |
+| Upgrade without closing | Replace ovens at midnight, open as usual in the morning | **Driver lifecycle management** |
+
+**Tutorial**: "Restaurant Lesson 3: What happens when the oven breaks?"
+
+---
+
+### Chapter 4: Multi-Kitchen Coordination ([Layer 4: Multi-Node GPU Communication](layer-4-multi-node/))
+
+**Story**: You've booked a 200-person wedding banquet. One kitchen can't handle it — three kitchens need to serve simultaneously.
+
+| Challenge | Solution | Technical Mapping |
+|-----------|----------|-------------------|
+| One dish prepared across multiple stations | Appetizer and main course stations work on different parts of the same dish simultaneously | **Tensor parallelism** |
+| Assembly-line service | Station 1 finishes and passes to Station 2 | **Pipeline parallelism** |
+| Fast communication | Dedicated radio channels, no shouting | **NCCL/RCCL** |
+| Traffic flow design | Passageways between kitchens must be wide enough | **Inter-node networking** |
+
+**Tutorial**: "Restaurant Lesson 4: How do multiple kitchens coordinate?"
+
+---
+
+### Chapter 5: Ingredient Storage ([Layer 5: Model Storage](layer-5-storage/))
+
+**Story**: Every day before opening, you retrieve ingredients from the warehouse, prep them, and preheat the ovens. How fast the first guest gets served depends on how well you've prepped.
+
+| Task | Description | Technical Mapping |
+|------|-------------|-------------------|
+| Central warehouse | A large shared cold storage for all branches | **Remote storage (S3/Spaces)** |
+| In-store fridge | Move today's ingredients in advance | **Local cache (HF cache)** |
+| Prep station | Cut, marinate, ready to cook at any moment | **Pre-download + warm start** |
+| Standardized ingredients | All ingredients in uniform packaging — open and use | **Safetensors format** |
+| Multi-menu prep | Pre-stock ingredients for different cuisines in the warehouse | **Multi-model caching** |
+
+**Tutorial**: "Restaurant Lesson 5: What to prepare before opening?"
+
+---
+
+## Extended Scenarios
 
 ### DDoS Attack
-> 「有人雇了 1000 人來門口排隊，但都不點餐。」
-> 解法：保全在門口篩選，只讓有訂位的人進來。
+> "Someone hired 1,000 people to queue at the door, but none of them order."
+> Solution: Security screens at the door — only those with reservations get in.
 
 ### GPU OOM
-> 「客人點了超大份量，盤子裝不下。」
-> 解法：設定最大份量限制（max_model_len）。
+> "A guest orders a mega-sized portion — the plate can't hold it."
+> Solution: Set a maximum portion size (`max_model_len`).
 
 ### Cold Start
-> 「凌晨 3 點有客人來，但廚師還在睡覺，食材還在倉庫。」
-> 解法：要嘛 24hr 待命（keep-warm），要嘛接受第一位客人要等。
+> "A guest shows up at 3 AM, but the chef is asleep and ingredients are still in the warehouse."
+> Solution: Either keep staff on standby 24/7 (keep-warm), or accept that the first guest has to wait.
 
 ### Model Switching
-> 「今天突然要換菜單，但備料都是昨天的菜。」
-> 解法：倉庫裡預存多套食材（pre-download multiple models）。
+> "Today's menu changes suddenly, but all the prep is for yesterday's dishes."
+> Solution: Pre-stock multiple sets of ingredients in the warehouse (pre-download multiple models).
 
 ---
 
